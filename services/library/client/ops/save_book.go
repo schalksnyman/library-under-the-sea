@@ -6,7 +6,7 @@ import (
 	"log"
 )
 
-// SaveBook saves the book to the library
+// SaveBook saves the book to the library and returns the id
 func SaveBook(book library.Book, r repo.Client) (int64, error) {
 	id, err := r.Save(book)
 	if err != nil {

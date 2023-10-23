@@ -13,9 +13,10 @@ func UpdateTitle(id int64, title string, r repo.Client) error {
 		return err
 	}
 
-	book.Title = title
+	bookCopy := *book
+	bookCopy.Title = title
 
-	_, err = r.Save(*book)
+	_, err = r.Save(bookCopy)
 	if err != nil {
 		log.Println(err.Error())
 		return err

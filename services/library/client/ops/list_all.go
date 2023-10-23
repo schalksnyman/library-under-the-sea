@@ -6,6 +6,7 @@ import (
 	"log"
 )
 
+// ListAll returns all the books in the library
 func ListAll(r repo.Client) ([]*library.Book, error) {
 	books, err := r.ListAll()
 	if err != nil {
