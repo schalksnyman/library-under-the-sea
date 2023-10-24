@@ -8,7 +8,6 @@ import (
 	repo_mock "library-under-the-sea/services/library-repo/client/mocks"
 	"library-under-the-sea/services/library/client/logical"
 	library "library-under-the-sea/services/library/domain"
-	"math/rand"
 	"testing"
 )
 
@@ -44,16 +43,19 @@ func (s *clientSuite) TestFindBook() {
 
 	s.client = logical.New(repoClient)
 
+	id := "5d36277e024f042ff4837ad5"
+
 	s.Run("Successfully Find Book", func() {
-		book, err := s.client.FindBook(bookExample.Id)
+		book, err := s.client.FindBook(id)
 		s.Require().NoError(err)
 		s.Require().NotNil(book)
 	})
 }
 
 func (s *clientSuite) TestSaveBook() {
+	id := "5d36277e024f042ff4837ad5"
 	repoClient := new(repo_mock.Client).TSetup(s.T())
-	repoClient.EXPECT().Save(mock.Anything).Return(1, nil)
+	repoClient.EXPECT().Save(mock.Anything).Return(id, nil)
 
 	s.client = logical.New(repoClient)
 
@@ -65,7 +67,7 @@ func (s *clientSuite) TestSaveBook() {
 	s.Run("Successfully Save Book", func() {
 		id, err := s.client.SaveBook(bookExample)
 		s.Require().NoError(err)
-		s.Require().GreaterOrEqual(id, int64(0))
+		s.Require().GreaterOrEqual(len(id), 1)
 	})
 }
 
@@ -114,20 +116,21 @@ func (s *clientSuite) TestUpdateTitle() {
 
 	repoClient.EXPECT().Get(mock.Anything).Once().Return(&bookExample, nil)
 
+	id := "5d36277e024f042ff4837ad5"
 	bookExampleCopy := bookExample
 	newTitle := "Updated title"
 	bookExampleCopy.Title = newTitle
-	repoClient.EXPECT().Save(mock.Anything).Once().Return(bookExampleCopy.Id, nil)
+	repoClient.EXPECT().Save(mock.Anything).Once().Return(id, nil)
 
-	repoClient.EXPECT().Get(bookExampleCopy.Id).Once().Return(&bookExampleCopy, nil)
+	repoClient.EXPECT().Get(id).Once().Return(&bookExampleCopy, nil)
 
 	s.client = logical.New(repoClient)
 
 	s.Run("Successfully Update Title", func() {
-		err := s.client.UpdateTitle(bookExample.Id, newTitle)
+		err := s.client.UpdateTitle(id, newTitle)
 		s.Require().NoError(err)
 
-		book, err := s.client.FindBook(bookExample.Id)
+		book, err := s.client.FindBook(id)
 		s.Require().NoError(err)
 		s.Require().Equal(newTitle, book.Title)
 	})
@@ -139,7 +142,7 @@ func (s *clientSuite) TestDeleteBook() {
 
 	s.client = logical.New(repoClient)
 
-	id := rand.Int63()
+	id := "5d36277e024f042ff4837ad5"
 
 	s.Run("Successfully Save Book", func() {
 		err := s.client.DeleteBook(id)

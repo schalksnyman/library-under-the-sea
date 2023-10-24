@@ -5,9 +5,9 @@ import (
 )
 
 type Client interface {
-	Get(id int64) (*library.Book, error)
+	Get(id string) (*library.Book, error)
 	ListByTitle(title string) ([]*library.Book, error)
 	ListAll() ([]*library.Book, error)
-	Save(b library.Book) (int64, error)
-	Delete(id int64) error
+	Save(b library.Book) (string, error)
+	Delete(id string) error
 }

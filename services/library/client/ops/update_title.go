@@ -6,7 +6,7 @@ import (
 )
 
 // UpdateTitle finds the book by ID, updates the title and saves the book with the new title
-func UpdateTitle(id int64, title string, r repo.Client) error {
+func UpdateTitle(id string, title string, r repo.Client) error {
 	book, err := r.Get(id)
 	if err != nil {
 		log.Println(err.Error())
@@ -16,6 +16,7 @@ func UpdateTitle(id int64, title string, r repo.Client) error {
 	bookCopy := *book
 	bookCopy.Title = title
 
+	//TODO(ssnyman): Rather create update repo method
 	_, err = r.Save(bookCopy)
 	if err != nil {
 		log.Println(err.Error())

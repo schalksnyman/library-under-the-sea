@@ -7,7 +7,7 @@ import (
 )
 
 // FindBook returns a book at a given id
-func FindBook(id int64, r repo.Client) (*library.Book, error) {
+func FindBook(id string, r repo.Client) (*library.Book, error) {
 	book, err := r.Get(id)
 	if err != nil {
 		log.Println(err.Error())

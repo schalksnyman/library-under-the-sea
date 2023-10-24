@@ -5,7 +5,6 @@ import (
 )
 
 type Book struct {
-	Id          int64     `json:"id"`
 	Title       string    `json:"title"`
 	Author      string    `json:"author"`
 	Edition     string    `json:"edition"`
@@ -13,10 +12,10 @@ type Book struct {
 }
 
 type Client interface {
-	FindBook(id int64) (*Book, error)
-	SaveBook(book Book) (int64, error)
+	FindBook(id string) (*Book, error)
+	SaveBook(book Book) (string, error)
 	ListBooksByTitle(title string) ([]*Book, error)
-	UpdateTitle(id int64, title string) error
-	DeleteBook(id int64) error
+	UpdateTitle(id string, title string) error
+	DeleteBook(id string) error
 	ListAll() ([]*Book, error)
 }

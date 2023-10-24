@@ -7,11 +7,11 @@ import (
 )
 
 // SaveBook saves the book to the library and returns the id
-func SaveBook(book library.Book, r repo.Client) (int64, error) {
+func SaveBook(book library.Book, r repo.Client) (string, error) {
 	id, err := r.Save(book)
 	if err != nil {
 		log.Println(err.Error())
-		return -1, err
+		return "", err
 	}
 
 	return id, nil

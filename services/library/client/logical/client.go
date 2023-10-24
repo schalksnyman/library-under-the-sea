@@ -10,7 +10,6 @@ import (
 var _ library.Client = (*client)(nil)
 
 func New(r repo.Client) *client {
-	//TODO(ssnyman): Default repo if nil?
 
 	return &client{
 		r: r,
@@ -21,7 +20,7 @@ type client struct {
 	r repo.Client
 }
 
-func (c *client) FindBook(id int64) (*library.Book, error) {
+func (c *client) FindBook(id string) (*library.Book, error) {
 	book, err := ops.FindBook(id, c.r)
 	if err != nil {
 		log.Println(err.Error())
@@ -30,11 +29,11 @@ func (c *client) FindBook(id int64) (*library.Book, error) {
 	return book, nil
 }
 
-func (c *client) SaveBook(book library.Book) (int64, error) {
+func (c *client) SaveBook(book library.Book) (string, error) {
 	id, err := ops.SaveBook(book, c.r)
 	if err != nil {
 		log.Println(err.Error())
-		return -1, err
+		return "", err
 	}
 	return id, nil
 }
@@ -48,7 +47,7 @@ func (c *client) ListBooksByTitle(title string) ([]*library.Book, error) {
 	return books, nil
 }
 
-func (c *client) UpdateTitle(id int64, title string) error {
+func (c *client) UpdateTitle(id string, title string) error {
 	err := ops.UpdateTitle(id, title, c.r)
 	if err != nil {
 		log.Println(err.Error())
@@ -57,7 +56,7 @@ func (c *client) UpdateTitle(id int64, title string) error {
 	return nil
 }
 
-func (c *client) DeleteBook(id int64) error {
+func (c *client) DeleteBook(id string) error {
 	err := ops.DeleteBook(id, c.r)
 	if err != nil {
 		log.Println(err.Error())

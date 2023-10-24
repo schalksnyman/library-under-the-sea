@@ -6,7 +6,7 @@ import (
 )
 
 // DeleteBook deletes a book at a given id
-func DeleteBook(id int64, r repo.Client) error {
+func DeleteBook(id string, r repo.Client) error {
 	err := r.Delete(id)
 	if err != nil {
 		log.Println(err.Error())
