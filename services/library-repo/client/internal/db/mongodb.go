@@ -1,4 +1,4 @@
-package logical
+package db
 
 import (
 	"context"
@@ -12,9 +12,7 @@ import (
 	"log"
 )
 
-var _ repo.Client = (*client)(nil)
-
-func New(connectString string, dbName string) *client {
+func NewMongoClient(connectString string, dbName string) repo.DBHandler {
 	clientOptions := options.Client().ApplyURI(connectString)
 	mongoClient, err := mongo.Connect(context.TODO(), clientOptions)
 	if err != nil {
@@ -39,7 +37,7 @@ type client struct {
 	database    *mongo.Database
 }
 
-func (c *client) Get(id string) (*library.Book, error) {
+func (c *client) Get(ctx context.Context, id string) (*library.Book, error) {
 	objID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		return nil, err
@@ -55,7 +53,7 @@ func (c *client) Get(id string) (*library.Book, error) {
 	return &book, nil
 }
 
-func (c *client) ListByTitle(title string) ([]*library.Book, error) {
+func (c *client) ListByTitle(ctx context.Context, title string) ([]*library.Book, error) {
 	var results []*library.Book
 	collection := c.database.Collection("books")
 	filter := bson.D{{"title", title}}
@@ -76,7 +74,7 @@ func (c *client) ListByTitle(title string) ([]*library.Book, error) {
 	return results, nil
 }
 
-func (c *client) ListAll() ([]*library.Book, error) {
+func (c *client) ListAll(ctx context.Context) ([]*library.Book, error) {
 	var results []*library.Book
 	collection := c.database.Collection("books")
 	cur, err := collection.Find(context.TODO(), bson.D{{}})
@@ -94,7 +92,7 @@ func (c *client) ListAll() ([]*library.Book, error) {
 	return results, nil
 }
 
-func (c *client) Save(book library.Book) (string, error) {
+func (c *client) Save(ctx context.Context, book library.Book) (string, error) {
 	collection := c.database.Collection("books")
 	res, err := collection.InsertOne(context.TODO(), book)
 	if err != nil {
@@ -105,7 +103,7 @@ func (c *client) Save(book library.Book) (string, error) {
 	return objID, nil
 }
 
-func (c *client) Delete(id string) error {
+func (c *client) Delete(ctx context.Context, id string) error {
 	collection := c.database.Collection("books")
 	idPrimitive, err := primitive.ObjectIDFromHex(id)
 	if err != nil {

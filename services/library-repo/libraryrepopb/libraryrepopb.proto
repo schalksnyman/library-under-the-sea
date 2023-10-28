@@ -1,0 +1,51 @@
+syntax = "proto3";
+
+package libraryrepopb;
+
+import "librarypb.proto";
+
+option go_package = "library-under-the-sea/services/library-repo/libraryrepopb";
+
+service LibraryRepo {
+rpc Get(GetRequest) returns (GetResponse) {}
+rpc ListByTitle(ListByTitleRequest) returns (ListByTitleResponse) {}
+rpc ListAll(ListAllRequest) returns (ListAllResponse) {}
+rpc Save(SaveRequest) returns (SaveResponse) {}
+rpc Delete(DeleteRequest) returns (DeleteResponse) {}
+}
+
+message GetRequest {
+  string id = 1;
+}
+
+message GetResponse {
+  librarypb.Book book = 1;
+}
+
+message ListByTitleRequest {
+  string title = 1;
+}
+
+message ListByTitleResponse {
+  repeated librarypb.Book books = 1;
+}
+
+message ListAllRequest {}
+
+message ListAllResponse {
+  repeated librarypb.Book books = 1;
+}
+
+message SaveRequest {
+  librarypb.Book book = 1;
+}
+
+message SaveResponse {
+  string id = 1;
+}
+
+message DeleteRequest {
+  string id = 1;
+}
+
+message DeleteResponse {}

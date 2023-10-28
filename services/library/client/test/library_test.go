@@ -1,6 +1,7 @@
 package test
 
 import (
+	"context"
 	fuzz "github.com/google/gofuzz"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
@@ -32,6 +33,7 @@ type clientSuite struct {
 }
 
 func (s *clientSuite) TestFindBook() {
+	ctx := context.TODO()
 	repoClient := new(repo_mock.Client).TSetup(s.T())
 
 	f := fuzz.New()
@@ -46,13 +48,14 @@ func (s *clientSuite) TestFindBook() {
 	id := "5d36277e024f042ff4837ad5"
 
 	s.Run("Successfully Find Book", func() {
-		book, err := s.client.FindBook(id)
+		book, err := s.client.FindBook(ctx, id)
 		s.Require().NoError(err)
 		s.Require().NotNil(book)
 	})
 }
 
 func (s *clientSuite) TestSaveBook() {
+	ctx := context.TODO()
 	id := "5d36277e024f042ff4837ad5"
 	repoClient := new(repo_mock.Client).TSetup(s.T())
 	repoClient.EXPECT().Save(mock.Anything).Return(id, nil)
@@ -65,13 +68,14 @@ func (s *clientSuite) TestSaveBook() {
 	f.Fuzz(&bookExample)
 
 	s.Run("Successfully Save Book", func() {
-		id, err := s.client.SaveBook(bookExample)
+		id, err := s.client.SaveBook(ctx, bookExample)
 		s.Require().NoError(err)
 		s.Require().GreaterOrEqual(len(id), 1)
 	})
 }
 
 func (s *clientSuite) TestListBooksByTitle() {
+	ctx := context.TODO()
 	repoClient := new(repo_mock.Client).TSetup(s.T())
 
 	unicodeRanges := fuzz.UnicodeRanges{
@@ -100,13 +104,14 @@ func (s *clientSuite) TestListBooksByTitle() {
 	s.client = logical.New(repoClient)
 
 	s.Run("Successfully List Books for Title", func() {
-		bookExamples, err := s.client.ListBooksByTitle(searchTitle)
+		bookExamples, err := s.client.ListBooksByTitle(ctx, searchTitle)
 		s.Require().NoError(err)
 		s.Require().Len(bookExamples, 2)
 	})
 }
 
 func (s *clientSuite) TestUpdateTitle() {
+	ctx := context.TODO()
 	repoClient := new(repo_mock.Client).TSetup(s.T())
 
 	f := fuzz.New()
@@ -127,16 +132,17 @@ func (s *clientSuite) TestUpdateTitle() {
 	s.client = logical.New(repoClient)
 
 	s.Run("Successfully Update Title", func() {
-		err := s.client.UpdateTitle(id, newTitle)
+		err := s.client.UpdateTitle(ctx, id, newTitle)
 		s.Require().NoError(err)
 
-		book, err := s.client.FindBook(id)
+		book, err := s.client.FindBook(ctx, id)
 		s.Require().NoError(err)
 		s.Require().Equal(newTitle, book.Title)
 	})
 }
 
 func (s *clientSuite) TestDeleteBook() {
+	ctx := context.TODO()
 	repoClient := new(repo_mock.Client).TSetup(s.T())
 	repoClient.EXPECT().Delete(mock.Anything).Return(nil)
 
@@ -145,12 +151,13 @@ func (s *clientSuite) TestDeleteBook() {
 	id := "5d36277e024f042ff4837ad5"
 
 	s.Run("Successfully Save Book", func() {
-		err := s.client.DeleteBook(id)
+		err := s.client.DeleteBook(ctx, id)
 		s.Require().NoError(err)
 	})
 }
 
 func (s *clientSuite) TestListAll() {
+	ctx := context.TODO()
 	repoClient := new(repo_mock.Client).TSetup(s.T())
 
 	unicodeRanges := fuzz.UnicodeRanges{
@@ -172,7 +179,7 @@ func (s *clientSuite) TestListAll() {
 	s.client = logical.New(repoClient)
 
 	s.Run("Successfully List All Books", func() {
-		bookExamples, err := s.client.ListAll()
+		bookExamples, err := s.client.ListAll(ctx)
 		s.Require().NoError(err)
 		s.Require().Len(bookExamples, 10)
 	})

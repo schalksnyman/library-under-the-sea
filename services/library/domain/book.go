@@ -1,6 +1,7 @@
 package domain
 
 import (
+	"context"
 	"time"
 )
 
@@ -12,10 +13,10 @@ type Book struct {
 }
 
 type Client interface {
-	FindBook(id string) (*Book, error)
-	SaveBook(book Book) (string, error)
-	ListBooksByTitle(title string) ([]*Book, error)
-	UpdateTitle(id string, title string) error
-	DeleteBook(id string) error
-	ListAll() ([]*Book, error)
+	FindBook(ctx context.Context, id string) (*Book, error)
+	ListBooksByTitle(ctx context.Context, title string) ([]*Book, error)
+	ListAll(ctx context.Context) ([]*Book, error)
+	SaveBook(ctx context.Context, book Book) (string, error)
+	UpdateTitle(ctx context.Context, id string, title string) error
+	DeleteBook(ctx context.Context, id string) error
 }

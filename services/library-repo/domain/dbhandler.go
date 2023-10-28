@@ -5,7 +5,7 @@ import (
 	library "library-under-the-sea/services/library/domain"
 )
 
-type Client interface {
+type DBHandler interface {
 	Get(ctx context.Context, id string) (*library.Book, error)
 	ListByTitle(ctx context.Context, title string) ([]*library.Book, error)
 	ListAll(ctx context.Context) ([]*library.Book, error)

@@ -1,0 +1,69 @@
+syntax = "proto3";
+
+package librarypb;
+
+import "google/protobuf/timestamp.proto";
+
+option go_package = "library-under-the-sea/services/library/librarypb";
+
+service Library {
+	rpc FindBook(FindBookRequest) returns (FindBookResponse) {}
+	rpc ListBooksByTitle(ListBooksByTitleRequest) returns (ListBooksByTitleResponse) {}
+	rpc ListAll(ListAllRequest) returns (ListAllResponse) {}
+	rpc SaveBook(SaveBookRequest) returns (SaveBookResponse) {}
+	rpc UpdateTitle(UpdateTitleRequest) returns (UpdateTitleResponse) {}
+	rpc DeleteBook(DeleteBookRequest) returns (DeleteBookResponse) {}
+
+}
+
+message Book {
+	string title = 1;
+	string author = 2;
+	string edition = 3;
+  google.protobuf.Timestamp publish_date = 4;
+}
+
+message FindBookRequest {
+	string id = 1;
+}
+
+message FindBookResponse {
+	Book book = 1;
+}
+
+message ListBooksByTitleRequest {
+	string title = 1;
+}
+
+message ListBooksByTitleResponse {
+	repeated Book books = 1;
+}
+
+message ListAllRequest {}
+
+message ListAllResponse {
+	repeated Book books = 1;
+}
+
+message SaveBookRequest {
+	Book book = 1;
+}
+
+message SaveBookResponse {
+	string id = 1;
+}
+
+message UpdateTitleRequest {
+	string id = 1;
+	string title = 2;
+}
+
+message UpdateTitleResponse {}
+
+message DeleteBookRequest {
+	string id = 1;
+}
+
+message DeleteBookResponse {}
+
+
