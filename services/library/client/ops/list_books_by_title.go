@@ -9,7 +9,7 @@ import (
 
 // ListBooksByTitle returns a list of books filtered by title
 func ListBooksByTitle(ctx context.Context, title string, r repo.Client) ([]*library.Book, error) {
-	books, err := r.ListByTitle(title)
+	books, err := r.ListByTitle(ctx, title)
 	if err != nil {
 		log.Println(err.Error())
 		return nil, err

@@ -1,0 +1,5 @@
+# Default values for library-repo.
+http-addr: 127.0.0.1:8201
+grpc-addr: 127.0.0.1:8200
+db-connect-string: mongodb://localhost:27017
+db-name: library

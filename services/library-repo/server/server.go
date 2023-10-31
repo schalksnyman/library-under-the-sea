@@ -2,9 +2,9 @@ package server
 
 import (
 	"context"
-	"google.golang.org/grpc"
 	"google.golang.org/protobuf/types/known/timestamppb"
 	"library-under-the-sea/services/library-repo/client/ops"
+	"library-under-the-sea/services/library-repo/client/ops/db"
 	libraryrepo "library-under-the-sea/services/library-repo/domain"
 	pb "library-under-the-sea/services/library-repo/libraryrepopb"
 	library "library-under-the-sea/services/library/domain"
@@ -15,25 +15,26 @@ var _ pb.LibraryRepoServer = (*Server)(nil)
 
 // Server implements the library grpc server.
 type Server struct {
-	repo   libraryrepo.Client
-	writer pb.LibraryRepoClient
+	d libraryrepo.DBHandler
+	//writer pb.LibraryRepoClient
 }
 
 // New returns a new server instance.
-func New(r libraryrepo.Client, writerConn *grpc.ClientConn) *Server {
-	var libraryRepoWriter pb.LibraryRepoClient
-	if writerConn != nil {
-		libraryRepoWriter = pb.NewLibraryRepoClient(writerConn)
-	}
+func New(connectString string, dbName string) *Server {
+	dbHandler := db.NewMongoClient(connectString, dbName)
+	//var libraryRepoWriter pb.LibraryRepoClient
+	//if writerConn != nil {
+	//	libraryRepoWriter = pb.NewLibraryRepoClient(writerConn)
+	//}
 
 	return &Server{
-		repo:   r,
-		writer: libraryRepoWriter,
+		d: dbHandler,
+		//writer: libraryRepoWriter,
 	}
 }
 
 func (srv *Server) Get(ctx context.Context, req *pb.GetRequest) (*pb.GetResponse, error) {
-	book, err := ops.Get(ctx, req.Id, srv.repo)
+	book, err := ops.Get(ctx, req.Id, srv.d)
 	if err != nil {
 		return nil, err
 	}
@@ -49,7 +50,7 @@ func (srv *Server) Get(ctx context.Context, req *pb.GetRequest) (*pb.GetResponse
 }
 
 func (srv *Server) ListByTitle(ctx context.Context, req *pb.ListByTitleRequest) (*pb.ListByTitleResponse, error) {
-	books, err := ops.ListByTitle(ctx, req.Title, srv.repo)
+	books, err := ops.ListByTitle(ctx, req.Title, srv.d)
 	if err != nil {
 		return nil, err
 	}
@@ -70,7 +71,7 @@ func (srv *Server) ListByTitle(ctx context.Context, req *pb.ListByTitleRequest) 
 }
 
 func (srv *Server) ListAll(ctx context.Context, req *pb.ListAllRequest) (*pb.ListAllResponse, error) {
-	books, err := ops.ListAll(ctx, srv.repo)
+	books, err := ops.ListAll(ctx, srv.d)
 	if err != nil {
 		return nil, err
 	}
@@ -98,7 +99,7 @@ func (srv *Server) Save(ctx context.Context, req *pb.SaveRequest) (*pb.SaveRespo
 		PublishDate: req.Book.PublishDate.AsTime(),
 	}
 
-	id, err := ops.Save(ctx, book, srv.repo)
+	id, err := ops.Save(ctx, book, srv.d)
 	if err != nil {
 		return nil, err
 	}
@@ -107,7 +108,7 @@ func (srv *Server) Save(ctx context.Context, req *pb.SaveRequest) (*pb.SaveRespo
 }
 
 func (srv *Server) Delete(ctx context.Context, req *pb.DeleteRequest) (*pb.DeleteResponse, error) {
-	err := ops.Delete(ctx, req.Id, srv.repo)
+	err := ops.Delete(ctx, req.Id, srv.d)
 	if err != nil {
 		return nil, err
 	}

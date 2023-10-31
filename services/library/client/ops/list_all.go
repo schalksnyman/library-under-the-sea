@@ -9,7 +9,7 @@ import (
 
 // ListAll returns all the books in the library
 func ListAll(ctx context.Context, r repo.Client) ([]*library.Book, error) {
-	books, err := r.ListAll()
+	books, err := r.ListAll(ctx)
 	if err != nil {
 		log.Println(err.Error())
 		return nil, err

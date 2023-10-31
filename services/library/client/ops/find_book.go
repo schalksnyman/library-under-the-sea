@@ -9,7 +9,7 @@ import (
 
 // FindBook returns a book at a given id
 func FindBook(ctx context.Context, id string, r repo.Client) (*library.Book, error) {
-	book, err := r.Get(id)
+	book, err := r.Get(ctx, id)
 	if err != nil {
 		log.Println(err.Error())
 		return nil, err

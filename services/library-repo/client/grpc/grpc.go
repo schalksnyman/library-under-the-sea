@@ -12,7 +12,7 @@ import (
 	"testing"
 )
 
-var addr = flag.String("library_repo_address", "", "host:port of library_rep gRPC service")
+var addr = flag.String("library_repo_address", "", "host:port of library_repo gRPC service")
 
 var _ repo.Client = (*client)(nil)
 
@@ -25,10 +25,10 @@ func IsEnabled() bool {
 	return *addr != ""
 }
 
-func New() (*client, error) {
+func New(connectString string, dbName string) (*client, error) {
 	var c client
 	var err error
-	c.rpcConn, err = newGRPCConnection(*addr, "library-repo")
+	c.rpcConn, err = newGRPCConnection(*addr)
 	if err != nil {
 		return nil, err
 	}
@@ -128,8 +128,7 @@ func (c *client) Delete(ctx context.Context, id string) error {
 	return nil
 }
 
-func newGRPCConnection(
-	addr string, serviceName string, dialOptions ...grpc.DialOption) (*grpc.ClientConn, error) {
+func newGRPCConnection(addr string) (*grpc.ClientConn, error) {
 	var opts []grpc.DialOption // No options yet
 
 	conn, err := grpc.Dial(addr, opts...)

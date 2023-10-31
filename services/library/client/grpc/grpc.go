@@ -27,7 +27,7 @@ func IsEnabled() bool {
 func New() (*client, error) {
 	var c client
 	var err error
-	c.rpcConn, err = newGRPCConnection(*addr, "library")
+	c.rpcConn, err = newGRPCConnection(*addr)
 	if err != nil {
 		return nil, err
 	}
@@ -136,8 +136,7 @@ func (c *client) DeleteBook(ctx context.Context, id string) error {
 	return nil
 }
 
-func newGRPCConnection(
-	addr string, serviceName string, dialOptions ...grpc.DialOption) (*grpc.ClientConn, error) {
+func newGRPCConnection(addr string) (*grpc.ClientConn, error) {
 	var opts []grpc.DialOption // No options yet
 
 	conn, err := grpc.Dial(addr, opts...)

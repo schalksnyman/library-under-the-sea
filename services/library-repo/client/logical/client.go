@@ -2,8 +2,8 @@ package logical
 
 import (
 	"context"
-	"library-under-the-sea/services/library-repo/client/internal/db"
 	"library-under-the-sea/services/library-repo/client/ops"
+	"library-under-the-sea/services/library-repo/client/ops/db"
 	repo "library-under-the-sea/services/library-repo/domain"
 	library "library-under-the-sea/services/library/domain"
 )

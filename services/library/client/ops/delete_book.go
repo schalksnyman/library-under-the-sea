@@ -8,7 +8,7 @@ import (
 
 // DeleteBook deletes a book at a given id
 func DeleteBook(ctx context.Context, id string, r repo.Client) error {
-	err := r.Delete(id)
+	err := r.Delete(ctx, id)
 	if err != nil {
 		log.Println(err.Error())
 	}

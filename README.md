@@ -16,8 +16,13 @@ provides a means for long-lasting connections, which gRPC takes advantage of.
 
 ## Todo
 - [ ] Dockerise services
-- [ ] Add Logger
 - [ ] Add Mongo DB seeder
 - [ ] Write more test cases incl. error scenarios
 - [ ] End-to-end testing
+- [ ] Router
+- [ ] Service discovery
+- [ ] Service leader election
+- [ ] Add Logger
 - [ ] GRPC TLS encryption
+- [ ] Telemetry integration
+- [ ] Prometheus metrics

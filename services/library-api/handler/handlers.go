@@ -1,4 +1,4 @@
-package logical
+package handler
 
 import (
 	"encoding/json"
@@ -29,7 +29,7 @@ func (c *client) Add(res http.ResponseWriter, req *http.Request) {
 		json.NewEncoder(res).Encode(libraryAPI.ErrorResponse{Message: "Invalid Payload"})
 		return
 	}
-	id, err := c.l.SaveBook(book)
+	id, err := c.l.SaveBook(req.Context(), book)
 	if err != nil {
 		res.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(res).Encode(libraryAPI.ErrorResponse{Message: err.Error()})
@@ -43,7 +43,7 @@ func (c *client) Add(res http.ResponseWriter, req *http.Request) {
 
 func (c *client) FindAll(res http.ResponseWriter, req *http.Request) {
 	res.Header().Set("Content-Type", "application/json")
-	results, err := c.l.ListAll()
+	results, err := c.l.ListAll(req.Context())
 	if err != nil {
 		res.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(res).Encode(libraryAPI.ErrorResponse{Message: err.Error()})
@@ -63,7 +63,7 @@ func (c *client) FindByTitle(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	results, err := c.l.ListBooksByTitle(request.Title)
+	results, err := c.l.ListBooksByTitle(req.Context(), request.Title)
 	if err != nil {
 		res.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(res).Encode(libraryAPI.ErrorResponse{Message: err.Error()})
@@ -83,7 +83,7 @@ func (c *client) FindBook(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	result, err := c.l.FindBook(request.Id)
+	result, err := c.l.FindBook(req.Context(), request.Id)
 	if err != nil {
 		res.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(res).Encode(libraryAPI.ErrorResponse{Message: err.Error()})
@@ -103,7 +103,7 @@ func (c *client) UpdateBookTitle(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	err = c.l.UpdateTitle(request.Id, request.Title)
+	err = c.l.UpdateTitle(req.Context(), request.Id, request.Title)
 	if err != nil {
 		res.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(res).Encode(libraryAPI.ErrorResponse{Message: err.Error()})
@@ -122,7 +122,7 @@ func (c *client) DeleteBook(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	err = c.l.DeleteBook(request.Id)
+	err = c.l.DeleteBook(req.Context(), request.Id)
 	if err != nil {
 		res.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(res).Encode(libraryAPI.ErrorResponse{Message: err.Error()})

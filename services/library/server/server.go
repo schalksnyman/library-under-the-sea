@@ -21,14 +21,14 @@ type Server struct {
 
 // New returns a new server instance.
 func New(r libraryrepo.Client, writerConn *grpc.ClientConn) *Server {
-	var libraryRepoWriter pb.LibraryClient
+	var libraryWriter pb.LibraryClient
 	if writerConn != nil {
-		libraryRepoWriter = pb.NewLibraryClient(writerConn)
+		libraryWriter = pb.NewLibraryClient(writerConn)
 	}
 
 	return &Server{
 		repo:   r,
-		writer: libraryRepoWriter,
+		writer: libraryWriter,
 	}
 }
 

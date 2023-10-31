@@ -10,7 +10,7 @@ import (
 // it returns a logical client.
 func New(connectString string, dbName string) (library_repo.Client, error) {
 	if grpc.IsEnabled() {
-		return grpc.New()
+		return grpc.New(connectString, dbName)
 	}
 
 	return logical.New(connectString, dbName), nil
