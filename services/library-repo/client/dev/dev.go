@@ -8,9 +8,9 @@ import (
 
 // New returns a gRPC client if the gRPC address is set via a flag. If not,
 // it returns a logical client.
-func New(connectString string, dbName string) (library_repo.Client, error) {
-	if grpc.IsEnabled() {
-		return grpc.New(connectString, dbName)
+func New(addr string, connectString string, dbName string) (library_repo.Client, error) {
+	if addr != "" {
+		return grpc.New(addr)
 	}
 
 	return logical.New(connectString, dbName), nil

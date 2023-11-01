@@ -2,7 +2,6 @@ package grpc
 
 import (
 	"context"
-	"flag"
 	"google.golang.org/grpc"
 	"google.golang.org/protobuf/types/known/timestamppb"
 	repo "library-under-the-sea/services/library-repo/domain"
@@ -12,8 +11,6 @@ import (
 	"testing"
 )
 
-var addr = flag.String("library_repo_address", "", "host:port of library_repo gRPC service")
-
 var _ repo.Client = (*client)(nil)
 
 type client struct {
@@ -21,14 +18,10 @@ type client struct {
 	rpcClient pb.LibraryRepoClient
 }
 
-func IsEnabled() bool {
-	return *addr != ""
-}
-
-func New(connectString string, dbName string) (*client, error) {
+func New(addr string) (*client, error) {
 	var c client
 	var err error
-	c.rpcConn, err = newGRPCConnection(*addr)
+	c.rpcConn, err = newGRPCConnection(addr)
 	if err != nil {
 		return nil, err
 	}

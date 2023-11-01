@@ -5,15 +5,13 @@ import (
 	"errors"
 	"github.com/gorilla/mux"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/keepalive"
 	"library-under-the-sea/services/library-api/handler"
+	libraryrepoClientDev "library-under-the-sea/services/library-repo/client/dev"
+	libraryClientDev "library-under-the-sea/services/library/client/dev"
 	"log"
 	"net"
 	"net/http"
 	"sync"
-	"time"
-
-	libraryClientDev "library-under-the-sea/services/library/client/dev"
 )
 
 type Config struct {
@@ -43,7 +41,6 @@ func New(config Config) (*Agent, error) {
 		shutdowns: make(chan struct{}),
 	}
 	setup := []func() error{
-		a.setupGRPCServer,
 		a.setupHTTPServer,
 	}
 	for _, fn := range setup {
@@ -53,56 +50,6 @@ func New(config Config) (*Agent, error) {
 	}
 	go a.serve()
 	return a, nil
-}
-
-func (a *Agent) setupGRPCServer() error {
-	log.Printf("Set up GRPC server\n")
-
-	// Validate address
-	addr, err := net.ResolveTCPAddr("tcp", a.Config.GRPCAddr)
-	if err != nil {
-		return err
-	}
-
-	if addr == nil {
-		return errors.New("no address provided")
-	}
-
-	var srv Server
-
-	listener, err := net.Listen("tcp", a.Config.GRPCAddr)
-	if err != nil {
-		return err
-	}
-	srv.listener = listener
-
-	kp := keepalive.ServerParameters{MaxConnectionAge: time.Minute}
-
-	opts := []grpc.ServerOption{grpc.KeepaliveParams(kp)}
-	srv.grpcServer = grpc.NewServer(opts...)
-
-	writerConn, err := makeWriterConn(a.Config.LibraryAddr)
-	if err != nil {
-		panic(errors.New("error making writer connection"))
-	}
-
-	a.server = &srv
-
-	return nil
-}
-
-func makeWriterConn(addr string) (*grpc.ClientConn, error) {
-	if addr == "" {
-		return nil, nil
-	}
-
-	var opts []grpc.DialOption
-	conn, err := grpc.Dial(addr, opts...)
-	if err != nil {
-		return nil, err
-	}
-
-	return conn, nil
 }
 
 func (a *Agent) setupHTTPServer() error {
@@ -118,9 +65,14 @@ func (a *Agent) setupHTTPServer() error {
 		return errors.New("no address provided")
 	}
 
-	libraryClient, err := libraryClientDev.New()
+	libraryRepoClient, err := libraryrepoClientDev.New(a.Config.LibraryAddr, a.Config.DBConnectString, a.Config.DBName)
 	if err != nil {
 		return errors.New("library repo client")
+	}
+
+	libraryClient, err := libraryClientDev.New(a.Config.LibraryAddr, libraryRepoClient)
+	if err != nil {
+		return errors.New("library client")
 	}
 
 	libraryAPIHandler := handler.New(libraryClient)
@@ -146,12 +98,6 @@ func (a *Agent) setupHTTPServer() error {
 }
 
 func makeHealthCheckHandler() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("ok\n"))
-	}
-}
-
-func makeAddBookHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("ok\n"))
 	}
@@ -201,32 +147,16 @@ func (srv *Server) Listener() net.Listener {
 	return srv.listener
 }
 
-// GRPCServer returns the server's grpc.Server.
-func (srv *Server) GRPCServer() *grpc.Server {
-	return srv.grpcServer
-}
-
 // Stop stops the gRPC server.
 func (srv *Server) Stop() {
-	srv.grpcServer.GracefulStop()
 	srv.httpServer.Shutdown(context.TODO())
 }
 
 // ServeForever listens for gRPC requests.
 func (srv *Server) ServeForever() error {
-	// Serve GRPC server
-	log.Printf("Starting up GRPC server\n")
-	errServerCh := make(chan error)
-	go func() {
-		err := srv.grpcServer.Serve(srv.listener)
-		if err != nil {
-			errServerCh <- err
-		}
-		errServerCh <- nil
-	}()
-
 	// Serve HTTP server
 	log.Printf("Starting up HTTP server\n")
+	errServerCh := make(chan error)
 	go func() {
 		err := srv.httpServer.ListenAndServe()
 		if err != nil {

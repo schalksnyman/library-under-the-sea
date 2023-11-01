@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"google.golang.org/grpc"
 	"google.golang.org/protobuf/types/known/timestamppb"
 	"library-under-the-sea/services/library-repo/client/ops"
 	"library-under-the-sea/services/library-repo/client/ops/db"
@@ -15,21 +16,21 @@ var _ pb.LibraryRepoServer = (*Server)(nil)
 
 // Server implements the library grpc server.
 type Server struct {
-	d libraryrepo.DBHandler
-	//writer pb.LibraryRepoClient
+	d      libraryrepo.DBHandler
+	writer pb.LibraryRepoClient
 }
 
 // New returns a new server instance.
-func New(connectString string, dbName string) *Server {
+func New(connectString string, dbName string, writerConn *grpc.ClientConn) *Server {
 	dbHandler := db.NewMongoClient(connectString, dbName)
-	//var libraryRepoWriter pb.LibraryRepoClient
-	//if writerConn != nil {
-	//	libraryRepoWriter = pb.NewLibraryRepoClient(writerConn)
-	//}
+	var libraryRepoWriter pb.LibraryRepoClient
+	if writerConn != nil {
+		libraryRepoWriter = pb.NewLibraryRepoClient(writerConn)
+	}
 
 	return &Server{
-		d: dbHandler,
-		//writer: libraryRepoWriter,
+		d:      dbHandler,
+		writer: libraryRepoWriter,
 	}
 }
 

@@ -22,8 +22,8 @@ type Config struct {
 	HTTPAddr string
 	// GRPCAddr is the GRPC address
 	GRPCAddr string
-	// Library-repo GRPC address
-	LibraryRepoAddr string
+	// Library GRPC address
+	LibraryAddr string
 	// Database connect string
 	DBConnectString string
 	// Database name
@@ -84,12 +84,12 @@ func (a *Agent) setupGRPCServer() error {
 	opts := []grpc.ServerOption{grpc.KeepaliveParams(kp)}
 	srv.grpcServer = grpc.NewServer(opts...)
 
-	libraryRepoClient, err := libraryrepoClientDev.New(a.Config.DBConnectString, a.Config.DBName)
+	libraryRepoClient, err := libraryrepoClientDev.New(a.Config.LibraryAddr, a.Config.DBConnectString, a.Config.DBName)
 	if err != nil {
 		return errors.New("library repo client")
 	}
 
-	writerConn, err := makeWriterConn(a.Config.LibraryRepoAddr)
+	writerConn, err := makeWriterConn(a.Config.LibraryAddr)
 	if err != nil {
 		panic(errors.New("error making writer connection"))
 	}
