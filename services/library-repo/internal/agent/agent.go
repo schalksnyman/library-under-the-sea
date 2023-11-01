@@ -5,6 +5,7 @@ import (
 	"errors"
 	"github.com/gorilla/mux"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/keepalive"
 	"log"
 	"net"
@@ -80,12 +81,14 @@ func (a *Agent) setupGRPCServer() error {
 
 	kp := keepalive.ServerParameters{MaxConnectionAge: time.Minute}
 
-	opts := []grpc.ServerOption{grpc.KeepaliveParams(kp)}
+	opts := []grpc.ServerOption{
+		grpc.KeepaliveParams(kp),
+	}
 	srv.grpcServer = grpc.NewServer(opts...)
 
 	writerConn, err := makeWriterConn(a.Config.LibraryRepoAddr)
 	if err != nil {
-		panic(errors.New("error making writer connection"))
+		panic(errors.New(err.Error()))
 	}
 
 	libraryrepoSrv := libraryrepo_server.New(a.Config.DBConnectString, a.Config.DBName, writerConn)
@@ -102,6 +105,8 @@ func makeWriterConn(addr string) (*grpc.ClientConn, error) {
 	}
 
 	var opts []grpc.DialOption
+	opts = append(opts, grpc.WithTransportCredentials(insecure.NewCredentials()))
+
 	conn, err := grpc.Dial(addr, opts...)
 	if err != nil {
 		return nil, err

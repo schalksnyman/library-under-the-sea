@@ -1,0 +1,6 @@
+# Default values for library-api.
+http-addr: 127.0.0.1:8401
+library-repo-addr: 127.0.0.1:8200
+library-addr: 127.0.0.1:8300
+db-connect-string: mongodb://localhost:27017
+db-name: library

@@ -8,14 +8,14 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"library-under-the-sea/services/library/internal/agent"
+	"library-under-the-sea/services/library-api/internal/agent"
 )
 
 func main() {
 	cli := &cli{}
 
 	cmd := &cobra.Command{
-		Use:     "library",
+		Use:     "library-api",
 		PreRunE: cli.setupConfig,
 		RunE:    cli.run,
 	}
@@ -41,13 +41,13 @@ func setupFlags(cmd *cobra.Command) error {
 	cmd.Flags().String("config-file", "", "Path to config file.")
 	cmd.Flags().String("http-addr",
 		"127.0.0.1:8401",
-		"Service library-repo healthcheck address")
-	cmd.Flags().String("grpc-addr",
-		"127.0.0.1:8400",
-		"Service library grpc server address")
+		"Service library-api HTTP bind address")
 	cmd.Flags().String("library-repo-addr",
 		"127.0.0.1:8401",
-		"Service library-repo grpc address")
+		"Service library grpc address")
+	cmd.Flags().String("library-addr",
+		"127.0.0.1:8401",
+		"Service library grpc address")
 	cmd.Flags().String("db-connect-string",
 		"mongodb://localhost:27017",
 		"Database connect string")
@@ -74,8 +74,8 @@ func (c *cli) setupConfig(cmd *cobra.Command, args []string) error {
 	}
 
 	c.cfg.HTTPAddr = viper.GetString("http-addr")
-	c.cfg.GRPCAddr = viper.GetString("grpc-addr")
-	c.cfg.GRPCAddr = viper.GetString("library-repo-addr")
+	c.cfg.LibraryRepoAddr = viper.GetString("library-repo-addr")
+	c.cfg.LibraryAddr = viper.GetString("library-addr")
 	c.cfg.DBConnectString = viper.GetString("db-connect-string")
 	c.cfg.DBName = viper.GetString("db-name")
 

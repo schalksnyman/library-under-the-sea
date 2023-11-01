@@ -17,6 +17,8 @@ import (
 type Config struct {
 	// HTTPAddr is the healthcheck address
 	HTTPAddr string
+	// Library Repo GRPC address
+	LibraryRepoAddr string
 	// Library GRPC address
 	LibraryAddr string
 	// Database connect string
@@ -65,14 +67,16 @@ func (a *Agent) setupHTTPServer() error {
 		return errors.New("no address provided")
 	}
 
-	libraryRepoClient, err := libraryrepoClientDev.New(a.Config.LibraryAddr, a.Config.DBConnectString, a.Config.DBName)
+	log.Printf("Create library repo client connection to GRPC server %s\n", a.Config.LibraryRepoAddr)
+	libraryRepoClient, err := libraryrepoClientDev.New(a.Config.LibraryRepoAddr, a.Config.DBConnectString, a.Config.DBName)
 	if err != nil {
-		return errors.New("library repo client")
+		return errors.New(err.Error())
 	}
 
+	log.Printf("Create library client connection to GRPC server %s\n", a.Config.LibraryAddr)
 	libraryClient, err := libraryClientDev.New(a.Config.LibraryAddr, libraryRepoClient)
 	if err != nil {
-		return errors.New("library client")
+		return errors.New(err.Error())
 	}
 
 	libraryAPIHandler := handler.New(libraryClient)
@@ -86,13 +90,16 @@ func (a *Agent) setupHTTPServer() error {
 	r.HandleFunc("/library/updatebooktitle", libraryAPIHandler.UpdateBookTitle).Methods(http.MethodPost)
 	r.HandleFunc("/library/deletebook", libraryAPIHandler.DeleteBook).Methods(http.MethodPost)
 
-	srv := &http.Server{
+	httpServer := &http.Server{
 		Addr:    addr.String(),
 		Handler: r,
 	}
-	srv.Addr = a.Config.HTTPAddr
+	httpServer.Addr = a.Config.HTTPAddr
 
-	a.server.httpServer = srv
+	var srv Server
+	srv.httpServer = httpServer
+
+	a.server = &srv
 
 	return nil
 }

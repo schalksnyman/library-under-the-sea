@@ -5,6 +5,7 @@ import (
 	"errors"
 	"github.com/gorilla/mux"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/keepalive"
 	"log"
 	"net"
@@ -22,8 +23,8 @@ type Config struct {
 	HTTPAddr string
 	// GRPCAddr is the GRPC address
 	GRPCAddr string
-	// Library GRPC address
-	LibraryAddr string
+	// Library repo GRPC address
+	LibraryRepoAddr string
 	// Database connect string
 	DBConnectString string
 	// Database name
@@ -73,6 +74,7 @@ func (a *Agent) setupGRPCServer() error {
 
 	var srv Server
 
+	log.Printf("GRPC server listens on %s\n", a.Config.GRPCAddr)
 	listener, err := net.Listen("tcp", a.Config.GRPCAddr)
 	if err != nil {
 		return err
@@ -81,19 +83,24 @@ func (a *Agent) setupGRPCServer() error {
 
 	kp := keepalive.ServerParameters{MaxConnectionAge: time.Minute}
 
-	opts := []grpc.ServerOption{grpc.KeepaliveParams(kp)}
+	opts := []grpc.ServerOption{
+		grpc.KeepaliveParams(kp),
+	}
 	srv.grpcServer = grpc.NewServer(opts...)
 
-	libraryRepoClient, err := libraryrepoClientDev.New(a.Config.LibraryAddr, a.Config.DBConnectString, a.Config.DBName)
+	log.Printf("Create library repo client connection to GRPC server %s\n", a.Config.LibraryRepoAddr)
+	libraryRepoClient, err := libraryrepoClientDev.New(a.Config.LibraryRepoAddr, a.Config.DBConnectString, a.Config.DBName)
 	if err != nil {
-		return errors.New("library repo client")
+		return errors.New(err.Error())
 	}
 
-	writerConn, err := makeWriterConn(a.Config.LibraryAddr)
+	log.Printf("Create library repo client writer connection\n")
+	writerConn, err := makeWriterConn(a.Config.LibraryRepoAddr)
 	if err != nil {
-		panic(errors.New("error making writer connection"))
+		panic(errors.New(err.Error()))
 	}
 
+	log.Printf("Create library server using library repo client writer connection\n")
 	librarySrv := library_server.New(libraryRepoClient, writerConn)
 	librarypb.RegisterLibraryServer(srv.GRPCServer(), librarySrv)
 
@@ -108,6 +115,8 @@ func makeWriterConn(addr string) (*grpc.ClientConn, error) {
 	}
 
 	var opts []grpc.DialOption
+	opts = append(opts, grpc.WithTransportCredentials(insecure.NewCredentials()))
+
 	conn, err := grpc.Dial(addr, opts...)
 	if err != nil {
 		return nil, err

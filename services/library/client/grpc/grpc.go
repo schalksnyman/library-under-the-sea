@@ -3,6 +3,7 @@ package grpc
 import (
 	"context"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/protobuf/types/known/timestamppb"
 	library "library-under-the-sea/services/library/domain"
 	"library-under-the-sea/services/library/librarypb"
@@ -130,7 +131,9 @@ func (c *client) DeleteBook(ctx context.Context, id string) error {
 }
 
 func newGRPCConnection(addr string) (*grpc.ClientConn, error) {
-	var opts []grpc.DialOption // No options yet
+	var opts []grpc.DialOption
+	// TODO(ssnyman): Use TLS
+	opts = append(opts, grpc.WithTransportCredentials(insecure.NewCredentials()))
 
 	conn, err := grpc.Dial(addr, opts...)
 	if err != nil {
